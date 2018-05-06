@@ -10,32 +10,32 @@ pipeline {
           }
     }
 
-    stage('Fragment_cache') {
+    stage('delete_recordings') {
       agent any
       steps {
-        build (job: 'Fragment_cache/master', propagate: false)
+        build (job: 'delete_recordings/master', propagate: false)
       }
     }
 
-    stage('Thumbnails') {
+    stage('i_frame_manifest') {
       agent any
       steps {
-        build (job: 'Thumbnails/master', propagate: false)
+        build (job: 'i_frame_manifest/master', propagate: false)
       }
     }
 
-    stage('AT_LRU_Cache') {
+    stage('shared_segmenter') {
       agent any
       steps {
-        build (job: 'AT_LRU_Cache/master', propagate: false)
+        build (job: 'shared_segmenter/master', propagate: false)
       }
     }
 
     stage('copy xmls') {
       steps {
-        sh '''scp -p root@$target_cluster:/tmp/Fragment_cache/*.xml .
-scp -p root@$target_cluster:/tmp/Thumbnails/*.xml .
-scp -p root@$target_cluster:/tmp/LRU_cache/*.xml .'''
+        sh '''scp -p root@$target_cluster:/tmp/Shared_Segmenter/*.xml .
+scp -p root@$target_cluster:/tmp/Iframe_manifest/*.xml .
+scp -p root@$target_cluster:/tmp/delete_recordings/*.xml .'''
       }
     }
 
