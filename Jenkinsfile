@@ -1,47 +1,55 @@
 pipeline {
-    agent any
-    environment {
-      target_cluster = '10.65.182.11'
+  agent any
+  environment {
+    target_cluster = '10.65.182.11'
+  }
+  stages {
+    stage('installation') {
+      steps {
+            sh 'python2.7 /var/tmp/Nightswatch/deploy/upgrade_machines_sa.py -p $target_cluster --ininame \'/var/lib/jenkins/nightswatch/5.1/config.ini\''
+          }
     }
-    stages {
-        stage('test_npvr_recording_deletion_5.1') {
-            agent any
-            steps {
-                build(job: 'test_npvr_recording_deletion_5.1', propagate: false)
-            }
-        }
 
-        stage('test_rsdvr_recording_deletion_5.1') {
-            agent any
-            steps {
-                build(job: 'test_rsdvr_recording_deletion_5.1', propagate: false)
-            }
-        }
+    stage('delete_recordings_5.1') {
+      agent any
+      steps {
+        build (job: 'delete_recordings_5.1', propagate: false)
+      }
+    }
 
-        stage('test_npvr_playout_deletion_5.1') {
-            agent any
-            steps {
-                build(job: 'test_npvr_playout_deletion_5.1', propagate: false)
-            }
-        }
+    stage('i_frame_manifest_5.1') {
+      agent any
+      steps {
+        build (job: 'i_frame_manifest_5.1', propagate: false)
+      }
+    }
 
-        stage('test_rsdvr_playout_deletion_5.1') {
-            agent any
-            steps {
-                build(job: 'test_rsdvr_playout_deletion_5.1', propagate: false)
-            }
-        }
+    stage('shared_segmenter_5.1') {
+      agent any
+      steps {
+        build (job: 'shared_segmenter_5.1', propagate: false)
+      }
+    }
 
-        stage('copy_xmls') {
-          agent any
-          steps {
-            sh 'scp -p root@$target_cluster:/tmp/delete_recordings/*.xml .'
-          }
-        }
+    stage('copy xmls') {
+      steps {
+        sh '''scp -p root@$target_cluster:/tmp/Shared_Segmenter/*.xml .
+scp -p root@$target_cluster:/tmp/Iframe_manifest/*.xml .
+scp -p root@$target_cluster:/tmp/delete_recordings/*.xml .'''
+      }
+    }
 
-        stage('publish junit results') {
-          steps {
-            junit(testResults: '*.xml', healthScaleFactor: 1.0, allowEmptyResults: true)
-          }
-        }
+    stage('check_cores') {
+      steps {
+        sh 'ssh root@$target_cluster "python2.7 /var/Nightswatch/deploy/find_cores.py"'
+      }
+    }
+
+    stage('publish junit results') {
+      steps {
+        junit(testResults: '*.xml', healthScaleFactor: 1.0, allowEmptyResults: true)
+      }
+    }
+
+  }
 }
