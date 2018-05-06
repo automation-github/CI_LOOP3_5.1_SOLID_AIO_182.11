@@ -13,21 +13,21 @@ pipeline {
     stage('delete_recordings_5.1') {
       agent any
       steps {
-        build (job: 'delete_recordings_5.1', propagate: false)
+        build (job: 'delete_recordings', propagate: false)
       }
     }
 
     stage('i_frame_manifest_5.1') {
       agent any
       steps {
-        build (job: 'i_frame_manifest_5.1', propagate: false)
+        build (job: 'i_frame_manifest', propagate: false)
       }
     }
 
     stage('shared_segmenter_5.1') {
       agent any
       steps {
-        build (job: 'shared_segmenter_5.1', propagate: false)
+        build (job: 'shared_segmenter', propagate: false)
       }
     }
 
